@@ -1,12 +1,13 @@
-pragma solidity ^0.7.4;
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.7.4;
 import "../ResolverBase.sol";
 
 abstract contract ContentHashResolver is ResolverBase {
-    bytes4 constant private CONTENT_HASH_INTERFACE_ID = 0xbc1c58d1;
+    bytes4 private constant CONTENT_HASH_INTERFACE_ID = 0xbc1c58d1;
 
     event ContenthashChanged(bytes32 indexed node, bytes hash);
 
-    mapping(bytes32=>bytes) hashes;
+    mapping(bytes32 => bytes) hashes;
 
     /**
      * Sets the contenthash associated with an ENS node.
@@ -14,7 +15,10 @@ abstract contract ContentHashResolver is ResolverBase {
      * @param node The node to update.
      * @param hash The contenthash to set
      */
-    function setContenthash(bytes32 node, bytes calldata hash) external authorised(node) {
+    function setContenthash(bytes32 node, bytes calldata hash)
+        external
+        authorised(node)
+    {
         hashes[node] = hash;
         emit ContenthashChanged(node, hash);
     }
@@ -28,7 +32,15 @@ abstract contract ContentHashResolver is ResolverBase {
         return hashes[node];
     }
 
-    function supportsInterface(bytes4 interfaceID) virtual override public pure returns(bool) {
-        return interfaceID == CONTENT_HASH_INTERFACE_ID || super.supportsInterface(interfaceID);
+    function supportsInterface(bytes4 interfaceID)
+        public
+        pure
+        virtual
+        override
+        returns (bool)
+    {
+        return
+            interfaceID == CONTENT_HASH_INTERFACE_ID ||
+            super.supportsInterface(interfaceID);
     }
 }

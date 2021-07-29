@@ -1,12 +1,17 @@
-pragma solidity ^0.7.4;
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.7.4;
 import "../ResolverBase.sol";
 
 abstract contract TextResolver is ResolverBase {
-    bytes4 constant private TEXT_INTERFACE_ID = 0x59d1d43c;
+    bytes4 private constant TEXT_INTERFACE_ID = 0x59d1d43c;
 
-    event TextChanged(bytes32 indexed node, string indexed indexedKey, string key);
+    event TextChanged(
+        bytes32 indexed node,
+        string indexed indexedKey,
+        string key
+    );
 
-    mapping(bytes32=>mapping(string=>string)) texts;
+    mapping(bytes32 => mapping(string => string)) texts;
 
     /**
      * Sets the text data associated with an ENS node and key.
@@ -15,7 +20,11 @@ abstract contract TextResolver is ResolverBase {
      * @param key The key to set.
      * @param value The text data value to set.
      */
-    function setText(bytes32 node, string calldata key, string calldata value) external authorised(node) {
+    function setText(
+        bytes32 node,
+        string calldata key,
+        string calldata value
+    ) external authorised(node) {
         texts[node][key] = value;
         emit TextChanged(node, key, key);
     }
@@ -26,11 +35,23 @@ abstract contract TextResolver is ResolverBase {
      * @param key The text data key to query.
      * @return The associated text data.
      */
-    function text(bytes32 node, string calldata key) external view returns (string memory) {
+    function text(bytes32 node, string calldata key)
+        external
+        view
+        returns (string memory)
+    {
         return texts[node][key];
     }
 
-    function supportsInterface(bytes4 interfaceID) virtual override public pure returns(bool) {
-        return interfaceID == TEXT_INTERFACE_ID || super.supportsInterface(interfaceID);
+    function supportsInterface(bytes4 interfaceID)
+        public
+        pure
+        virtual
+        override
+        returns (bool)
+    {
+        return
+            interfaceID == TEXT_INTERFACE_ID ||
+            super.supportsInterface(interfaceID);
     }
 }

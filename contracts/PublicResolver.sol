@@ -1,10 +1,11 @@
-pragma solidity ^0.7.4;pragma experimental ABIEncoderV2;
+// SPDX-License-Identifier: MIT
+pragma solidity >=0.7.4;
+pragma experimental ABIEncoderV2;
 
-import "@ensdomains/ens/contracts/ENS.sol";
+import "./ENS.sol";
 import "./profiles/ABIResolver.sol";
 import "./profiles/AddrResolver.sol";
 import "./profiles/ContentHashResolver.sol";
-import "./profiles/DNSResolver.sol";
 import "./profiles/InterfaceResolver.sol";
 import "./profiles/NameResolver.sol";
 import "./profiles/PubkeyResolver.sol";
@@ -14,7 +15,15 @@ import "./profiles/TextResolver.sol";
  * A simple resolver anyone can use; only allows the owner of a node to set its
  * address.
  */
-contract PublicResolver is ABIResolver, AddrResolver, ContentHashResolver, DNSResolver, InterfaceResolver, NameResolver, PubkeyResolver, TextResolver {
+contract PublicResolver is
+    ABIResolver,
+    AddrResolver,
+    ContentHashResolver,
+    InterfaceResolver,
+    NameResolver,
+    PubkeyResolver,
+    TextResolver
+{
     ENS ens;
 
     /**
@@ -23,9 +32,15 @@ contract PublicResolver is ABIResolver, AddrResolver, ContentHashResolver, DNSRe
      * the set of authorisations.
      * (node, owner, caller) => isAuthorised
      */
-    mapping(bytes32=>mapping(address=>mapping(address=>bool))) public authorisations;
+    mapping(bytes32 => mapping(address => mapping(address => bool)))
+        public authorisations;
 
-    event AuthorisationChanged(bytes32 indexed node, address indexed owner, address indexed target, bool isAuthorised);
+    event AuthorisationChanged(
+        bytes32 indexed node,
+        address indexed owner,
+        address indexed target,
+        bool isAuthorised
+    );
 
     constructor(ENS _ens) {
         ens = _ens;
@@ -41,29 +56,52 @@ contract PublicResolver is ABIResolver, AddrResolver, ContentHashResolver, DNSRe
      *
      * @param node The name to change the authorisation on.
      * @param target The address that is to be authorised or deauthorised.
-     * @param isAuthorised True if the address should be authorised, or false if it should be deauthorised.
+     * @param _isAuthorised True if the address should be authorised, or false if it should be deauthorised.
      */
-    function setAuthorisation(bytes32 node, address target, bool isAuthorised) external {
-        authorisations[node][msg.sender][target] = isAuthorised;
-        emit AuthorisationChanged(node, msg.sender, target, isAuthorised);
+    function setAuthorisation(
+        bytes32 node,
+        address target,
+        bool _isAuthorised
+    ) external {
+        authorisations[node][msg.sender][target] = _isAuthorised;
+        emit AuthorisationChanged(node, msg.sender, target, _isAuthorised);
     }
 
-    function isAuthorised(bytes32 node) internal override view returns(bool) {
+    function isAuthorised(bytes32 node) internal view override returns (bool) {
         address owner = ens.owner(node);
         return owner == msg.sender || authorisations[node][owner][msg.sender];
     }
 
-    function multicall(bytes[] calldata data) external returns(bytes[] memory results) {
+    function multicall(bytes[] calldata data)
+        external
+        returns (bytes[] memory results)
+    {
         results = new bytes[](data.length);
-        for(uint i = 0; i < data.length; i++) {
-            (bool success, bytes memory result) = address(this).delegatecall(data[i]);
+        for (uint256 i = 0; i < data.length; i++) {
+            (bool success, bytes memory result) = address(this).delegatecall(
+                data[i]
+            );
             require(success);
             results[i] = result;
         }
         return results;
     }
 
-    function supportsInterface(bytes4 interfaceID) virtual override(ABIResolver, AddrResolver, ContentHashResolver, DNSResolver, InterfaceResolver, NameResolver, PubkeyResolver, TextResolver) public pure returns(bool) {
+    function supportsInterface(bytes4 interfaceID)
+        public
+        pure
+        virtual
+        override(
+            ABIResolver,
+            AddrResolver,
+            ContentHashResolver,
+            InterfaceResolver,
+            NameResolver,
+            PubkeyResolver,
+            TextResolver
+        )
+        returns (bool)
+    {
         return super.supportsInterface(interfaceID);
     }
 }
