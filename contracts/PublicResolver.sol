@@ -67,7 +67,7 @@ contract PublicResolver is
         emit AuthorisationChanged(node, msg.sender, target, _isAuthorised);
     }
 
-    function isAuthorised(bytes32 node) internal view override returns (bool) {
+    function isAuthorised(bytes32 node) internal view override virtual returns (bool) {
         address owner = ens.owner(node);
         return owner == msg.sender || authorisations[node][owner][msg.sender];
     }

@@ -23,7 +23,7 @@ contract OwnedResolver is
     PubkeyResolver,
     TextResolver
 {
-    function isAuthorised(bytes32 node) internal view override returns (bool) {
+    function isAuthorised(bytes32 node) internal view override virtual returns (bool) {
         return msg.sender == owner();
     }
 
